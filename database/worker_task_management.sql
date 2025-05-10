@@ -1,10 +1,16 @@
-CREATE TABLE workers (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(100) NOT NULL,
-  email VARCHAR(100) UNIQUE NOT NULL,
-  password VARCHAR(255) NOT NULL,
-  phone VARCHAR(20),
-  address TEXT
+CREATE TABLE `tbl_workers` (
+  `id` int(11) NOT NULL,
+  `full_name` varchar(100) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `phone` varchar(20) NOT NULL,
+  `address` text NOT NULL
 );
 
-ALTER TABLE workers AUTO_INCREMENT = 1000;
+ALTER TABLE `tbl_workers`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `tbl_workers`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `tbl_workers` AUTO_INCREMENT = 1000;
