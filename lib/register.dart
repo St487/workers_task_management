@@ -219,9 +219,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
 
     if (password.length < 6) {
-    showCustomSnackBar("Password must be at least 6 characters");
-    return;
-  }
+      showCustomSnackBar("Password must be at least 6 characters");
+      return;
+    }
+
+    if (phone.length < 10 || phone.length > 15 || !RegExp(r'^[0-9]+$').hasMatch(phone)) {
+      showCustomSnackBar("Please enter a valid phone number");
+      return;
+    }
 
     showDialog(
       context: context,
