@@ -228,6 +228,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
+    if (address.length < 5) {
+      showCustomSnackBar("Address must be at least 5 characters");
+      return;
+    }
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
