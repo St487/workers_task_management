@@ -14,7 +14,7 @@ SQL script to create the `workers` table with ID starting at 1000:
 Path: `database/worker_task_management.sql`
 
 ## 🔗 Demo Video (YouTube)
-[https://youtu.be/e_mDFLAwSVw]
+[https://youtu.be/e_mDFLAwSVw](https://youtu.be/e_mDFLAwSVw)
 
 ### Flutter
 1. Open the `worker_task_management/` folder in VS Code or Android Studio.
