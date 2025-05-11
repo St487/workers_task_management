@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:worker_task_management/login.dart';
-import 'package:worker_task_management/mainscreen.dart';
+import 'package:worker_task_management/screen/login.dart';
+import 'package:worker_task_management/screen/mainscreen.dart';
 import 'package:worker_task_management/user.dart';
 
 void main() {

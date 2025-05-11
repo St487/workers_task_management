@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:worker_task_management/profile.dart';
+import 'package:worker_task_management/screen/profile.dart';
 import 'package:worker_task_management/user.dart';
 
 class MainScreen extends StatefulWidget {
