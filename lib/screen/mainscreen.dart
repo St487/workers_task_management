@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:worker_task_management/screen/profile.dart';
-import 'package:worker_task_management/user.dart';
+import 'package:worker_task_management/model/user.dart';
+import 'package:worker_task_management/screen/tasklist.dart';
 
 class MainScreen extends StatefulWidget {
   final User user;
@@ -56,6 +57,16 @@ class _MainScreenState extends State<MainScreen> {
             ),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(onPressed: (){
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => TaskListScreen(user: widget.user)),
+        );
+      },
+        tooltip: "View Tasks",
+        backgroundColor: Colors.lightBlue.shade200,
+        child: Icon(Icons.task),
       ),
     );
   }
