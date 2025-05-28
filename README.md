@@ -44,7 +44,7 @@ Task list and submission:
 
 ### Sample Data Preview
 ```sql
-INSERT INTO `tbl_works` (`id`, `title`, `description`, `assigned_to`, `date_assigned`, `due_date`, `status`) VALUES
+INSERT INTO tbl_works (title, description, assigned_to, date_assigned, due_date, status) VALUES
 ('Prepare Material A', 'Prepare raw material A for assembly.', 1, '2025-05-25', '2025-05-28', 'pending'),
 ('Inspect Machine X', 'Conduct inspection for machine X.', 2, '2025-05-25', '2025-05-29', 'pending'),
 ('Clean Area B', 'Deep clean work area B before audit.', 3, '2025-05-25', '2025-05-30', 'pending'),
