@@ -1,6 +1,4 @@
 <?php
-sleep(3); // Add this near the top of the file to simulate a 3-second delay
-
 error_reporting(0);
 header("Access-Control-Allow-Origin: *"); // running as crome app
 

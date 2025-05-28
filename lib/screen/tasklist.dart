@@ -38,6 +38,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Greeting message with user's name
             Row(
               children: [
                 const CircleAvatar(
@@ -49,7 +50,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Good Evening!",
+                    Text("Good to see you!",
                         style: TextStyle(fontSize: 16, color: Colors.grey)),
                     Text(widget.user.userName.toString(),
                         style: TextStyle(
@@ -61,7 +62,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
       
             const SizedBox(height: 30),
       
-            // Tabs
+            // Tabs for My Tasks and Completed
             Row(
               children: [
                 Flexible(
@@ -118,32 +119,35 @@ class _TaskListScreenState extends State<TaskListScreen> {
             ),
       
             const SizedBox(height: 20),
-      
+
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: const [
-                Text("Today Tasks",
+                Text("Your Tasks",
                     style: TextStyle(
                         fontSize: 18, fontWeight: FontWeight.bold)),
               ],
             ),
       
             const SizedBox(height: 10),
-
+            
+            // Task List
             Expanded(
               child: isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : filteredTasks().isEmpty
+                  ? const Center(child: CircularProgressIndicator()) // show loading process if isloading = true
+                  : filteredTasks().isEmpty // else show the task list
+                      // if no tasks available, show a message
                       ? const Center(
                           child: Text(
                             "No task available.",
                             style: TextStyle(fontSize: 16, color: Colors.grey),
                           ),
                         )
+                      // else show the list of tasks
                       : ListView.builder(
-                          itemCount: filteredTasks().length,
+                          itemCount: filteredTasks().length, // number of tasks
                           itemBuilder: (context, index) {
-                            final task = filteredTasks()[index];
+                            final task = filteredTasks()[index]; // get the task at the current index
                             return Container(
                               margin: const EdgeInsets.only(bottom: 10),
                               padding: const EdgeInsets.all(16),
@@ -200,6 +204,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                                               "Due: ${task.dueDate}",
                                               style: const TextStyle(fontSize: 12),
                                             ),
+                                            // Show "Done" button only for pending tasks
                                             task.status != 'completed'
                                             ? ElevatedButton(
                                                 onPressed: () async{
@@ -222,8 +227,8 @@ class _TaskListScreenState extends State<TaskListScreen> {
                                                 ),
                                                 child: const Text("Done"),
                                               )
-                                            : const SizedBox(), // empty space for completed tasks
-
+                                            // empty space for completed tasks
+                                            : const SizedBox(), 
                                           ],
                                         ),
                                       ],
@@ -243,6 +248,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
   }
   
   void loadTasks() {
+    // Show loading indicator while fetching tasks
     setState(() {
       isLoading = true;
     });
@@ -256,7 +262,9 @@ class _TaskListScreenState extends State<TaskListScreen> {
       if (response.statusCode == 200) {
         var jsondata = json.decode(response.body);
         if (jsondata['status'] == 'success') {
+          // If the response is successful, clear the task list
           taskList.clear();
+          // Parse the JSON data and add tasks to the list
           for (var item in jsondata['data']) {
             taskList.add(Task.fromJson(item));
           }
@@ -274,7 +282,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
       }
     });
   }
-
+  // Filter tasks based on the selected tab
   List<Task> filteredTasks() {
   if (isMyTaskSelected) {
     // Show only pending tasks
