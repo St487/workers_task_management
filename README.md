@@ -26,7 +26,7 @@ Located in the `database/` folder:
 Login, Register and Profile:
 [Click here to watch the demo video on YouTube](https://youtu.be/e_mDFLAwSVw)
 Task list and submission:
-[Click here to watch the demo video on YouTube](https://youtu.be/e_mDFLAwSVw)
+[Click here to watch the demo video on YouTube](https://youtu.be/BufbBMHhTFA)
 
 ### Flutter
 1. Open the `worker_task_management/` folder in VS Code or Android Studio.
