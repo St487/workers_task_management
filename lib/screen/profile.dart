@@ -494,6 +494,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void saveProfile() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 20),
+              Text("Submitting..."),
+            ],
+          ),
+        );
+      },
+    );
+
     http.post(Uri.parse("${MyConfig.myurl}/worker/php/update_profile.php"), body: {
       "userId": widget.user.userId,
       "name": nameController.text,
@@ -512,13 +528,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
           widget.user.userEmail = emailController.text;
           widget.user.userPhone = phoneController.text;
           widget.user.userAddress = addressController.text;
+          Navigator.of(context).pop(); // Close the loading dialog
           setState(() {
             isEditing = false; // Exit editing mode
           });
           showCustomSnackBar("Updated!");
         } else if (jsondata['status'] == 'failed' && jsondata['data'] == 'email exists') {
+          Navigator.of(context).pop(); 
           showCustomSnackBar("Email already exists!");
         } else {
+          Navigator.of(context).pop(); 
           showCustomSnackBar("Failed to update profile!");
         }
       }

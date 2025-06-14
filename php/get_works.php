@@ -12,6 +12,13 @@ include_once("db_connect.php");
 
 $userId = $_POST['userId'];
 
+$updateSql = "UPDATE tbl_works 
+              SET status = 'overdue' 
+              WHERE assigned_to = '$userId' 
+              AND status = 'pending' 
+              AND due_date < CURDATE()";
+$conn->query($updateSql);
+
 $sqlid="SELECT * FROM `tbl_works` WHERE `assigned_to` = '$userId'";
 $result = $conn->query($sqlid);
 

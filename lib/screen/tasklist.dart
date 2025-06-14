@@ -107,7 +107,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        "Completed",
+                        "Overdue",
                         style: TextStyle(
                           color: isMyTaskSelected ? Colors.black54 : Colors.white,
                         ),
@@ -180,9 +180,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                                                 child: Text(
                                                   "${task.status}",
                                                   style: TextStyle(
-                                                    color: task.status == 'completed'
-                                                        ? Colors.green
-                                                        : Colors.red,
+                                                    color: Colors.red,
                                                     fontWeight: FontWeight.bold,
                                                   ),
                                                 ),
@@ -205,7 +203,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                                               style: const TextStyle(fontSize: 12),
                                             ),
                                             // Show "Done" button only for pending tasks
-                                            task.status != 'completed'
+                                            task.status != 'overdue'
                                             ? ElevatedButton(
                                                 onPressed: () async{
                                                   await Navigator.push(
@@ -296,7 +294,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
     return taskList.where((task) => task.status == 'pending').toList();
   } else {
     // Show only completed tasks
-    return taskList.where((task) => task.status == 'completed').toList();
+    return taskList.where((task) => task.status == 'overdue').toList();
   }
 }
 }
