@@ -262,11 +262,18 @@ class _TaskListScreenState extends State<TaskListScreen> {
       if (response.statusCode == 200) {
         var jsondata = json.decode(response.body);
         if (jsondata['status'] == 'success') {
-          // If the response is successful, clear the task list
           taskList.clear();
-          // Parse the JSON data and add tasks to the list
-          for (var item in jsondata['data']) {
-            taskList.add(Task.fromJson(item));
+          var data = jsondata['data'];
+
+          if (data.isEmpty) {
+            setState(() {
+              taskList = [];
+            });
+          } else {
+            for (var item in data) {
+              taskList.add(Task.fromJson(item));
+            }
+            setState(() {});
           }
         } else {
           Navigator.of(context).pop();

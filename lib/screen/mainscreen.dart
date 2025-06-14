@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:worker_task_management/screen/historyscreen.dart';
 import 'package:worker_task_management/screen/profile.dart';
 import 'package:worker_task_management/model/user.dart';
 import 'package:worker_task_management/screen/tasklist.dart';
@@ -12,62 +13,70 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  String maintitle = "Tasks";
+  int _currentIndex = 0;
+  late List<Widget> tabchildren;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    tabchildren = [
+      TaskListScreen(
+        user: widget.user,
+      ),
+      HistoryScreen(
+        user: widget.user
+        ),
+      ProfileScreen(
+        user: widget.user,
+      ),
+    ];
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Main Screen", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),),
-        centerTitle: true,
+      body: tabchildren[_currentIndex],
+      bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.lightBlue.shade200,
-        leading: IconButton(
-          icon: Icon(Icons.person),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => ProfileScreen(user: widget.user)),
-            );
-          },
-        ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            CircleAvatar(
-              radius: 70,
-              backgroundImage: AssetImage("assets/images/logo.png"),
-            ),
-            SizedBox(height: 30),
-            
-            // Welcome message with user's name
-            Text(
-              "Welcome, ${widget.user.userName}!",
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.purple),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 10),
-
-            // Tagline or additional message
-            Text(
-              "You are now logged into the Worker Task Management System.",
-              style: TextStyle(fontSize: 18, color: Colors.black54),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(onPressed: (){
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => TaskListScreen(user: widget.user)),
-        );
-      },
-        tooltip: "View Tasks",
-        backgroundColor: Colors.lightBlue.shade200,
-        child: Icon(Icons.task),
+        selectedItemColor: Colors.white,
+        onTap: onTabTapped,
+        currentIndex: _currentIndex,
+        items: [
+          BottomNavigationBarItem(
+              icon: Icon(
+                Icons.task,
+                size: MediaQuery.of(context).size.width * 0.07,
+              ),
+              label: "Tasks"),
+          BottomNavigationBarItem(
+              icon: Icon(
+                Icons.history, 
+                size: MediaQuery.of(context).size.width * 0.07
+              ),
+              label: "History"),
+          BottomNavigationBarItem(
+              icon: Icon(
+                Icons.person, 
+                size: MediaQuery.of(context).size.width * 0.07
+              ), 
+              label: "Profile")
+        ],
       ),
     );
+  }
+
+  void onTabTapped(int value) {
+    setState(() {
+      _currentIndex = value;
+      if (_currentIndex == 0) {
+        maintitle = "Tasks";
+      }
+      if (_currentIndex == 1) {
+        maintitle = "History";
+      }
+      if (_currentIndex == 2) {
+        maintitle = "Profile";
+      }
+    });
   }
 }

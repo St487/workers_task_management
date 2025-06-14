@@ -325,11 +325,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
               context,
               MaterialPageRoute(builder: (context) => const LoginScreen()),
             );
+        } else if (jsondata['status'] == 'failed' && jsondata['data'] == 'email exists') {
+          showCustomSnackBar("Email already exists!");
         } else {
           Navigator.of(context).pop(); // Close the loading dialog
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text("Email already exists!"),
-          ));
+          showCustomSnackBar("Failed to register!");
         }
       }
     });

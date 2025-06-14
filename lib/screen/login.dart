@@ -143,6 +143,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ));
                                   isChecked = false;
                                   return;
+                                } else {
+                                  // Store credentials if checkbox is checked
+                                  storeCredentials(email, password, isChecked);
                                 }
                               }
                             }),
@@ -238,22 +241,13 @@ class _LoginScreenState extends State<LoginScreen> {
           var userdata = jsondata['data'];
           User user = User.fromJson(userdata[0]);
 
-          if (isChecked) {
-            SharedPreferences prefs = await SharedPreferences.getInstance();
-            await prefs.setString('userId', user.userId ?? '');
-            await prefs.setString('userName', user.userName ?? '');
-            await prefs.setString('userEmail', user.userEmail ?? '');
-            await prefs.setString('userPhone', user.userPhone ?? '');
-            await prefs.setString('userAddress', user.userAddress ?? '');
-            await prefs.setBool('isLoggedIn', true);
-          }
+          Navigator.of(context).pop(); // Close loading dialog
 
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content:
                 Text("Welcome ${user.userName}"),
             backgroundColor: Colors.green,
           ));
-          Navigator.of(context).pop(); // Close the loading dialog
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) =>  MainScreen(user: user,)),
@@ -271,5 +265,18 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       }
     });
+  }
+  
+  Future<void> storeCredentials(String email, String password, bool isChecked) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (isChecked) {
+      await prefs.setString('userEmail', email);
+      await prefs.setString('userPassword', password);
+      await prefs.setBool('isLoggedIn', isChecked);
+    } else {
+      await prefs.remove('userEmail');
+      await prefs.remove('userPassword');
+      await prefs.setBool('isLoggedIn', false);
+    }
   }
 }

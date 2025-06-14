@@ -1,5 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:worker_task_management/myconfig.dart';
 import 'package:worker_task_management/screen/login.dart';
 import 'package:worker_task_management/model/user.dart';
 
@@ -12,15 +16,65 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  var genderOption = [
+    'Not specified',
+    'Female',
+    'Male',
+  ];
+  late TextEditingController nameController;
+  late TextEditingController emailController;
+  late TextEditingController genderController;
+  late TextEditingController phoneController;
+  late TextEditingController addressController;
+  @override
+  void initState() {
+    super.initState();
+    getProfile(); 
+  }
+
+  bool isLoading = false;
+  bool isEditing = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text("Profile", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),),
         centerTitle: true,
-        backgroundColor: Colors.lightBlue.shade200
+        backgroundColor: Colors.lightBlue.shade200,
       ),
-      body: SingleChildScrollView(
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            SizedBox(
+              height: 30,
+            ),
+            ListTile(
+              leading: Icon(Icons.edit),
+              title: Text('Edit Profile'),
+              onTap: () {
+                Navigator.pop(context); // close drawer
+                setState(() {
+                  isEditing = true;
+                });
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.logout),
+              title: Text('Logout'),
+              onTap: () {
+                Navigator.pop(context);
+                logout(context);
+              },
+            ),
+          ],
+        ),
+      ),
+        
+      body: isLoading
+        ? const Center(child: CircularProgressIndicator())
+        : SingleChildScrollView(
         child: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -60,6 +114,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 SizedBox(height: 5,),
                 Container(
                   width: 300,
+                  height: 40,
                   decoration: BoxDecoration(
                     boxShadow: [
                       BoxShadow(
@@ -68,7 +123,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         offset: Offset(0, 4),
                       ),
                     ],
-                    color: Colors.grey.shade200,
+                    color: Colors.grey.shade300,
                     border: Border.all(
                       color: Colors.grey.shade200,
                     ),
@@ -77,7 +132,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Text('${widget.user.userId}'),
+                    child: TextFormField(
+                    initialValue: '${widget.user.userId}',
+                    readOnly: true,
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+                      ),
+                    ),
                   ),
                 ),
                 SizedBox(height: 20,),
@@ -91,6 +153,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 SizedBox(height: 5,),
                 Container(
                   width: 300,
+                  height: 40,
                   decoration: BoxDecoration(
                     boxShadow: [
                       BoxShadow(
@@ -99,20 +162,83 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         offset: Offset(0, 4),
                       ),
                     ],
-                    color: Colors.grey.shade200,
+                    color: Colors.grey.shade300,
                     border: Border.all(
                       color: Colors.grey.shade200,
                     ),
                     borderRadius: BorderRadius.circular(10.0),
                   ),
-          
+
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Text('${widget.user.userName}'),
+                    child: TextFormField(
+                      controller: nameController,
+                      readOnly: true,
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+                      ),
+                    ),
                   ),
                 ),
                 SizedBox(height: 20,),
-          
+
+                SizedBox(
+                  width: 300,
+                  child: Text(
+                    "Gender", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                  ),
+                ),
+                SizedBox(height: 5,),
+                Container(
+                  width: 300,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 10,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
+                    color: isEditing ? Colors.white : Colors.grey.shade300,
+                    border: Border.all(
+                      color: Colors.grey.shade200,
+                    ),
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                    child: isEditing
+                      ? DropdownButton(
+                          itemHeight: 60,
+                          value: genderController.text.isEmpty ? "Not Specified" : genderController.text,
+                          underline: const SizedBox(),
+                          isExpanded: true,
+                          icon: const Icon(Icons.keyboard_arrow_down),
+                          items: genderOption.map((String items) {
+                            return DropdownMenuItem(
+                              value: items,
+                              child: Text(items),
+                            );
+                          }).toList(),
+                          onChanged: (String? newValue) {
+                            String gender = newValue!;
+                            setState(() {genderController.text = gender;});
+                          },
+                        )
+                      : Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            genderController.text.isEmpty ? "Not specified" : genderController.text,
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ),
+                  ),
+                ),
+                SizedBox(height: 20,),
+
+                          
                 SizedBox(
                   width: 300,
                   child: Text(
@@ -122,6 +248,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 SizedBox(height: 5,),
                 Container(
                   width: 300,
+                  height: 40,
                   decoration: BoxDecoration(
                     boxShadow: [
                       BoxShadow(
@@ -130,7 +257,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         offset: Offset(0, 4),
                       ),
                     ],
-                    color: Colors.grey.shade200,
+                    color: isEditing ? Colors.white : Colors.grey.shade300,
                     border: Border.all(
                       color: Colors.grey.shade200,
                     ),
@@ -139,7 +266,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Text('${widget.user.userEmail}'),
+                    child: TextFormField(
+                      controller: emailController,
+                      readOnly: !isEditing,
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+                      ),
+                    ),
                   ),
                 ),
                 SizedBox(height: 20,),
@@ -153,6 +287,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 SizedBox(height: 5,),
                 Container(
                   width: 300,
+                  height: 40,
                   decoration: BoxDecoration(
                     boxShadow: [
                       BoxShadow(
@@ -161,7 +296,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         offset: Offset(0, 4),
                       ),
                     ],
-                    color: Colors.grey.shade200,
+                    color: isEditing ? Colors.white : Colors.grey.shade300,
                     border: Border.all(
                       color: Colors.grey.shade200,
                     ),
@@ -170,7 +305,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Text('${widget.user.userPhone}'),
+                    child: TextFormField(
+                      controller: phoneController,
+                      readOnly: !isEditing,
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+                      ),
+                    ),
                   ),
                 ),
                 SizedBox(height: 20,),
@@ -184,6 +326,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 SizedBox(height: 5,),
                 Container(
                   width: 300,
+                  height: 40,
                   decoration: BoxDecoration(
                     boxShadow: [
                       BoxShadow(
@@ -192,7 +335,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         offset: Offset(0, 4),
                       ),
                     ],
-                    color: Colors.grey.shade200,
+                    color: isEditing ? Colors.white : Colors.grey.shade300,
                     border: Border.all(
                       color: Colors.grey.shade200,
                     ),
@@ -201,23 +344,49 @@ class _ProfileScreenState extends State<ProfileScreen> {
           
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Text('${widget.user.userAddress}'),
+                    child: TextFormField(
+                      controller: addressController,
+                      readOnly: !isEditing,
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+                      ),
+                    ),
                   ),
                 ),
                 SizedBox(height: 30,),
-          
-                ElevatedButton(
-                  onPressed: (){
-                    logout(context);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue.shade300,
-                    foregroundColor: Colors.white,
-                  ), 
-                  child: Text("Log Out"),
-                ),
-                SizedBox(height: 30,)
-          
+
+                isEditing
+                  ? Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            isEditing = false;
+                            getProfile();
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue.shade300,
+                          foregroundColor: Colors.white,
+                        ),
+                        child: Text("Cancel Edit"),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          updateProfile();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue.shade300,
+                          foregroundColor: Colors.white,
+                        ),
+                        child: Text("Save Changes"),
+                      ),
+                    ],
+                  )
+                  : SizedBox(),
+                SizedBox(height: 30,),
               ],
             ),
           ),
@@ -227,13 +396,174 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> logout(BuildContext context) async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  await prefs.clear(); // Clear all stored data
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Confirmation"),
+          content: const Text("Are you sure you want to log out?"),
+          actions: [
+            TextButton(
+              child: const Text("Yes"),
+              onPressed: () async {
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                await prefs.clear(); // Clear all stored data
+                Navigator.of(context).pop();
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                );
+              },
+            ),
+            TextButton(
+              child: const Text("No"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      }
+    );
+  }  
 
-  Navigator.pop(context);
-  Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(builder: (context) => const LoginScreen()),
-  );
-}
+  void updateProfile() {
+    if (nameController.text.isEmpty ||
+        emailController.text.isEmpty ||
+        //passwordController.text.isEmpty ||
+        //confirmPasswordController.text.isEmpty ||
+        phoneController.text.isEmpty ||
+        addressController.text.isEmpty) {
+      showCustomSnackBar("Please fill all fields");
+      return;
+    }
+
+    // if (password != confirmPassword) {
+    //   showCustomSnackBar("Passwords do not match");
+    //   return;
+    // }
+
+    bool isValidEmail = RegExp(
+        r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+      .hasMatch(emailController.text);
+
+    if (!isValidEmail) {
+      showCustomSnackBar("Please enter a valid email");
+      return;
+    }
+
+    // if (password.length < 6) {
+    //   showCustomSnackBar("Password must be at least 6 characters");
+    //   return;
+    // }
+
+    if (phoneController.text.length < 10 || phoneController.text.length > 15 || !RegExp(r'^[0-9]+$').hasMatch(phoneController.text)) {
+      showCustomSnackBar("Please enter a valid phone number");
+      return;
+    }
+
+    if (addressController.text.length < 5) {
+      showCustomSnackBar("Address must be at least 5 characters");
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Confirmation"),
+          content: const Text("Are you sure you want to update profile?"),
+          actions: [
+            TextButton(
+              child: const Text("Ok"),
+              onPressed: () {
+                Navigator.of(context).pop();
+                saveProfile();
+              },
+            ),
+            TextButton(
+              child: const Text("Cancel"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      }
+    );
+  }
+
+  void saveProfile() {
+    http.post(Uri.parse("${MyConfig.myurl}/worker/php/update_profile.php"), body: {
+      "userId": widget.user.userId,
+      "name": nameController.text,
+      "gender": genderController.text,
+      "email": emailController.text,
+      "phone": phoneController.text,
+      "address": addressController.text,
+    }).then((response) async {
+      print(response.body);
+      if (response.statusCode == 200) {
+        var jsondata = json.decode(response.body);
+        if (jsondata['status'] == 'success') {
+          // Update the user object with new values
+          widget.user.userName = nameController.text;
+          widget.user.userGender = genderController.text;
+          widget.user.userEmail = emailController.text;
+          widget.user.userPhone = phoneController.text;
+          widget.user.userAddress = addressController.text;
+          setState(() {
+            isEditing = false; // Exit editing mode
+          });
+          showCustomSnackBar("Updated!");
+        } else if (jsondata['status'] == 'failed' && jsondata['data'] == 'email exists') {
+          showCustomSnackBar("Email already exists!");
+        } else {
+          showCustomSnackBar("Failed to update profile!");
+        }
+      }
+    });
+  }
+
+    void showCustomSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        margin: const EdgeInsets.all(16),
+      ),
+    );
+  }
+  
+  void getProfile() {
+    setState(() {
+      isLoading = true;
+    });
+
+    http.post(Uri.parse("${MyConfig.myurl}/worker/php/get_profile.php"), body: {
+      "userId": widget.user.userId,
+    }).then((response) async {
+      setState(() {
+        isLoading = false;
+      });
+      if (response.statusCode == 200) {
+        var jsondata = json.decode(response.body);
+        if (jsondata['status'] == 'success') {
+          var userdata = jsondata['data'];
+          User user = User.fromJson(userdata[0]);
+
+          nameController = TextEditingController(text: widget.user.userName);
+          emailController = TextEditingController(text: widget.user.userEmail);
+          genderController = TextEditingController(text: user.userGender);
+          phoneController = TextEditingController(text: widget.user.userPhone);
+          addressController = TextEditingController(text: widget.user.userAddress);
+        } else {
+          showCustomSnackBar("Failed to get data!");
+        }
+      }
+    });
+  }
 }
