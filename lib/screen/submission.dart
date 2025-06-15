@@ -5,7 +5,6 @@ import 'package:worker_task_management/model/submittedtask.dart';
 import 'package:worker_task_management/model/task.dart';
 import 'package:worker_task_management/model/user.dart';
 import 'package:worker_task_management/myconfig.dart';
-import 'package:worker_task_management/screen/historyscreen.dart';
 
 class Submission extends StatefulWidget {
   final Task? task;
@@ -213,10 +212,6 @@ class _SubmissionState extends State<Submission> {
         if (jsondata['status'] == 'success') {
           Navigator.of(context).pop(); // Close the loading dialog
           Navigator.of(context).pop('updated');
-          // Navigator.pushReplacement(context, 
-          // MaterialPageRoute(
-          //   builder: (context) => HistoryScreen(user: widget.user),
-          // ),);
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text("Submitted!"),
             backgroundColor: Colors.green,
