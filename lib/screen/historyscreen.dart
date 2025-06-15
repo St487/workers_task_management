@@ -2,9 +2,11 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:worker_task_management/model/task.dart';
+import 'package:intl/intl.dart';
+import 'package:worker_task_management/model/submittedtask.dart';
 import 'package:worker_task_management/model/user.dart';
 import 'package:worker_task_management/myconfig.dart';
+import 'package:worker_task_management/screen/submission.dart';
 
 class HistoryScreen extends StatefulWidget {
   final User user;
@@ -20,17 +22,22 @@ class _HistoryScreenState extends State<HistoryScreen> {
     super.initState();
     loadTasks(); // Load tasks when the screen is initialized
   }
-  List<Task> taskList = <Task>[];
+  List<Submittedtask> submissionList = <Submittedtask>[];
+  bool isLoading = false;
+  int? tappedIndex;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 214, 226, 233),
       appBar: AppBar(
-        title: const Text("Task History", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),),
+        title: const Text("Submission History", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),),
         centerTitle: true,
         backgroundColor: Colors.lightBlue.shade200,
       ),
-      body: taskList.isEmpty
+      body: isLoading 
+      ? const Center(child: CircularProgressIndicator())
+      : submissionList.isEmpty
         ? const Center(
             child: Text(
               "No task available.",
@@ -45,26 +52,41 @@ class _HistoryScreenState extends State<HistoryScreen> {
               children: [
                 Expanded(
                   child: ListView.builder(
-                  itemCount: taskList.length, // number of tasks
+                  itemCount: submissionList.length, // number of tasks
                   itemBuilder: (context, index) {
-                    final task = taskList[index]; // get the task at the current index
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Flexible(
-                                      child: Container(
+                    final task = submissionList[index]; // get the task at the current index
+                    final isTapped = tappedIndex == index;
+
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          tappedIndex = index;
+                        });
+                        Future.delayed(const Duration(milliseconds: 100), () {
+                          if (mounted) {
+                            setState(() {
+                              tappedIndex = null;
+                            });
+                          }
+                        });
+                        showDetails(task);
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 10),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: isTapped ? Colors.grey.shade200 : Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Container(
                                         alignment: Alignment.centerLeft,
                                         child: Text(
                                           "${task.title}",
@@ -73,43 +95,33 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                           ),
                                         ),
                                       ),
-                                    ),
-                                    Flexible(
-                                      child: Container(
-                                        alignment: Alignment.centerRight,
-                                        child: Text(
-                                          "${task.status}",
-                                          style: TextStyle(
-                                            color: Colors.red,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                            
-                              const SizedBox(height: 4),
-                              Text(
-                                "${task.description}",
-                                style: const TextStyle(color: Colors.grey),
-                              ),
-                              const SizedBox(height: 4),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    "Due: ${task.dueDate}",
-                                    style: const TextStyle(fontSize: 12),
+                                    ],
                                   ),
-                                ]
-                              ),
-                            ],
+                              
+                                const SizedBox(height: 4),
+                                Text(
+                                  task.text ?? '',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(color: Colors.grey),
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "Submission Date: ${task.date != null ? DateFormat('yyyy-MM-dd').format(DateTime.parse(task.date!)) : "N/A"}",
+                                      style: const TextStyle(fontSize: 12),
+                                    ),
+                                  ]
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  );
+                        ],
+                      ),
+                                        ),
+                    );
                 },
                 ),
               ),
@@ -118,29 +130,40 @@ class _HistoryScreenState extends State<HistoryScreen> {
         ),
       );
   }
-  void loadTasks() {
+  void loadTasks() { 
+    setState(() {
+      isLoading = true;
+    });
+
     http.post(Uri.parse("${MyConfig.myurl}/worker/php/get_submission.php"), body: {
       "worker_id": widget.user.userId,
     }).then((response) async {
+      setState(() {
+        isLoading = false;
+      });
       print(response.body);
       if (response.statusCode == 200) {
         var jsondata = json.decode(response.body);
-        if (jsondata['status'] == 'success') {
-          taskList.clear();
+        if (jsondata['status'] == 'success' && jsondata['data'] != 'no task') {
+          submissionList.clear();
           var data = jsondata['data'];
 
           if (data.isEmpty) {
             setState(() {
-              taskList = [];
+              submissionList = [];
             });
+            return;
           } else {
             for (var item in data) {
-              taskList.add(Task.fromJson(item));
+              submissionList.add(Submittedtask.fromJson(item));
             }
             setState(() {});
           }
+        } else if (jsondata['status'] == 'success' && jsondata['data'] == 'no task') {
+          setState(() {
+            submissionList = [];
+          });
         } else {
-          Navigator.of(context).pop();
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text("Failed!"),
             behavior: SnackBarBehavior.floating,
@@ -151,6 +174,143 @@ class _HistoryScreenState extends State<HistoryScreen> {
           ));
         }
       }
+    });
+  }
+  
+  void showDetails(Submittedtask task) {
+    showDialog(context: context, builder: (context) {
+      return Dialog(
+        shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Title
+                Row(
+                  children: [
+                    const Icon(Icons.bookmark, color: Colors.blueAccent),
+                    const SizedBox(width: 8,),
+                    Expanded(
+                      child: Text(
+                        task.title ?? "No Title",
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // Submission Text
+                Row(
+                  children: [
+                    Icon(Icons.note, size: 18),
+                    const SizedBox(width: 4),
+                    const Text(
+                      "Submission Text",
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.shade400,
+                        blurRadius: 4,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                    
+                  ),
+                  child: Text(
+                    task.text ?? "No Text Submitted",
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Submission Date
+                Row(
+                  children: [
+                    const Icon(Icons.calendar_month, size: 18),
+                    const SizedBox(width: 4),
+                    const Text(
+                      "Submitted on ",
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  task.date != null
+                      ? DateFormat('yyyy-MM-dd').format(DateTime.parse(task.date!))
+                      : "N/A",
+                ),
+                const SizedBox(height: 24),
+
+                // Buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    // Cancel Button
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text("Cancel"),
+                    ),
+                    const SizedBox(width: 8),
+
+                    // Edit Button
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blueAccent,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      onPressed: () async {
+                        Navigator.of(context).pop(); // Close dialog
+
+                        // Now navigate to edit page and wait for result
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Submission(
+                              task: null,
+                              user: widget.user,
+                              submittedTask: task,
+                            ),
+                          ),
+                        );
+
+                        // After returning from edit screen
+                        if (result == 'updated') {
+                          setState(() {
+                            loadTasks(); // Reload your data here
+                          });
+                        }
+                      },
+                      child: const Text("Edit", style: TextStyle(color: Colors.white),),
+                    ),
+                  ],
+                )
+                ],
+              ),
+            )
+          )
+      );
     });
   }
 }

@@ -10,24 +10,10 @@ if (!isset($_POST)) {
 
 include_once("db_connect.php");
 
-$userId = $_POST['userId'];
-$name = $_POST['name'];
-$gender = $_POST['gender'];
-$email = $_POST['email'];
-$phone = $_POST['phone'];
-$address = $_POST['address'];
+$submissionId = $_POST['submissionId'];
+$details = $_POST['details'];
 
-$sqlemail = "SELECT `email` FROM `tbl_workers` WHERE email = '$email' AND id != '$userId'";
-$result = $conn->query($sqlemail);
-
-if ($result->num_rows > 0) {
-    $response = array('status' => 'failed', 'data' => 'email exists');
-    sendJsonResponse($response);
-    die;
-}
-
-
-$sqlupdate = "UPDATE `tbl_workers` SET `full_name` = '$name', `gender` = '$gender',`email` = '$email', `phone` = '$phone', `address` = '$address' WHERE id = '$userId'";
+$sqlupdate = "UPDATE `tbl_submissions` SET `submission_text` = '$details' WHERE `id` = '$submissionId'";
 
 try{
     if ($conn->query($sqlupdate) === TRUE) {

@@ -212,6 +212,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                                                       builder: (context) => Submission(
                                                         task: task,
                                                         user: widget.user,
+                                                        submittedTask: null,
                                                       ),
                                                     ),
                                                   );

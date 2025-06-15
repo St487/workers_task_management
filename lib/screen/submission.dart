@@ -1,14 +1,17 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:worker_task_management/model/submittedtask.dart';
 import 'package:worker_task_management/model/task.dart';
 import 'package:worker_task_management/model/user.dart';
 import 'package:worker_task_management/myconfig.dart';
+import 'package:worker_task_management/screen/historyscreen.dart';
 
 class Submission extends StatefulWidget {
-  final Task task;
+  final Task? task;
   final User user;
-  const Submission({super.key, required this.task, required this.user});
+  final Submittedtask? submittedTask;
+  const Submission({super.key, required this.task, required this.user, required this.submittedTask});
 
   @override
   State<Submission> createState() => _SubmissionState();
@@ -16,6 +19,17 @@ class Submission extends StatefulWidget {
 
 class _SubmissionState extends State<Submission> {
   TextEditingController detailsController = TextEditingController();
+  bool isEditing = false;
+  @override
+  void initState() {
+    super.initState();
+    if (widget.submittedTask != null) {
+      isEditing = true;
+      detailsController.text = widget.submittedTask!.text ?? "";
+    }
+    
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,7 +53,7 @@ class _SubmissionState extends State<Submission> {
             // Displaying the task title in a read-only TextFormField
             // This allows the user to see the task they are submitting work for
             TextFormField(         
-              initialValue: widget.task.title,
+              initialValue: isEditing ? widget.submittedTask!.title : widget.task!.title,
               readOnly: true,
               decoration: InputDecoration(
                 border: OutlineInputBorder(),
@@ -58,10 +72,10 @@ class _SubmissionState extends State<Submission> {
             SizedBox(height: 8),
             // TextField for entering details about the work completed
             TextField(
-             controller: detailsController,
-              maxLines: 5,
+              controller: detailsController,
+              maxLines: 6,
               decoration: InputDecoration(
-                hintText: 'What did you complete?',
+                hintText: isEditing ? null : 'What did you complete?',
                 border: OutlineInputBorder(),
               ),
               textInputAction: TextInputAction.newline,
@@ -106,7 +120,7 @@ class _SubmissionState extends State<Submission> {
             TextButton(
               child: const Text("Ok"),
               onPressed: () {
-                submitState();
+                isEditing? edit() :submitState();
                 Navigator.of(context).pop();
               },
             ),
@@ -143,7 +157,7 @@ class _SubmissionState extends State<Submission> {
     String details = detailsController.text;
     http.post(Uri.parse("${MyConfig.myurl}/worker/php/submit_work.php"), body: {
       "workerId": widget.user.userId,
-      "taskId": widget.task.id,
+      "taskId": widget.task!.id,
       "details": details,
     }).then((response) async {
       if (response.statusCode == 200) {
@@ -152,6 +166,57 @@ class _SubmissionState extends State<Submission> {
         if (jsondata['status'] == 'success') {
           Navigator.of(context).pop(); // Close the loading dialog
           Navigator.of(context).pop(); // Go back to TaskListScreen
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text("Submitted!"),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            margin: const EdgeInsets.all(16),
+          ));
+        } else {
+          Navigator.of(context).pop(); // Close the loading dialog
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text("Failed to submit work. Please try again."),
+          ));
+        }
+      }
+    });
+  }
+
+  void edit(){
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 20),
+              Text("Submitting..."),
+            ],
+          ),
+        );
+      },
+    );
+
+    String details = detailsController.text;
+    http.post(Uri.parse("${MyConfig.myurl}/worker/php/edit_submission.php"), body: {
+      "submissionId": widget.submittedTask!.id,
+      "details": details,
+    }).then((response) async {
+      if (response.statusCode == 200) {
+        var jsondata = json.decode(response.body);
+        print(response.body);
+        if (jsondata['status'] == 'success') {
+          Navigator.of(context).pop(); // Close the loading dialog
+          Navigator.of(context).pop('updated');
+          // Navigator.pushReplacement(context, 
+          // MaterialPageRoute(
+          //   builder: (context) => HistoryScreen(user: widget.user),
+          // ),);
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text("Submitted!"),
             backgroundColor: Colors.green,

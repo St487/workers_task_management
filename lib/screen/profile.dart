@@ -576,7 +576,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
           nameController = TextEditingController(text: widget.user.userName);
           emailController = TextEditingController(text: widget.user.userEmail);
-          genderController = TextEditingController(text: user.userGender);
+          genderController = TextEditingController(
+            text: (widget.user.userGender?.isEmpty ?? true) ? "Not specified" : widget.user.userGender!
+          );
           phoneController = TextEditingController(text: widget.user.userPhone);
           addressController = TextEditingController(text: widget.user.userAddress);
         } else {
