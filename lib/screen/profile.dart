@@ -571,7 +571,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (response.statusCode == 200) {
         var jsondata = json.decode(response.body);
         if (jsondata['status'] == 'success') {
-
           nameController = TextEditingController(text: widget.user.userName);
           emailController = TextEditingController(text: widget.user.userEmail);
           genderController = TextEditingController(

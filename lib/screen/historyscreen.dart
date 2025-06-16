@@ -178,6 +178,21 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
   
   void showDetails(Submittedtask task) {
+    // Parse due date
+    DateTime? dueDate;
+    if (task.dueDate != null) {
+      try {
+        dueDate = DateTime.parse(task.dueDate!);
+      } catch (e) {
+        dueDate = null;
+      }
+    }
+
+    bool canEdit = dueDate == null || 
+    DateTime.now().toLocal().isBefore(
+      DateTime(dueDate.year, dueDate.month, dueDate.day).add(const Duration(days: 1))
+    );
+
     showDialog(context: context, builder: (context) {
       return Dialog(
         shape:
@@ -257,21 +272,39 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       ? DateFormat('yyyy-MM-dd').format(DateTime.parse(task.date!))
                       : "N/A",
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 12),
+
+                Row(
+                  children: [
+                    const Icon(Icons.access_time,size: 18),
+                    const SizedBox(width: 4,),
+                    const Text("Due date ",
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  task.date != null
+                      ? DateFormat('yyyy-MM-dd').format(DateTime.parse(task.dueDate!))
+                      : "N/A",
+                ),
+                const SizedBox(height: 12),
 
                 // Buttons
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    // Cancel Button
+                    // Close Button
                     TextButton(
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
-                      child: const Text("Cancel"),
+                      child: const Text("Close"),
                     ),
                     const SizedBox(width: 8),
-
+                    
+                    canEdit?
                     // Edit Button
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
@@ -303,7 +336,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         }
                       },
                       child: const Text("Edit", style: TextStyle(color: Colors.white),),
-                    ),
+                    )
+                    : SizedBox(),
                   ],
                 )
                 ],

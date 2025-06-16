@@ -4,6 +4,7 @@ class Submittedtask {
   String? workerId;
   String? text;
   String? date;
+  String? dueDate;
   String? title;
 
   Submittedtask(
@@ -12,14 +13,16 @@ class Submittedtask {
       this.workerId,
       this.text,
       this.date,
+      this.dueDate,
       this.title});
 
   Submittedtask.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     workId = json['work_id'];
-    workerId = json['woker_id'];
+    workerId = json['worker_id'];
     text = json['submission_text'];
     date = json['submitted_at'];
+    dueDate = json['due_date'];
     title = json['title'];
   }
 
@@ -30,6 +33,7 @@ class Submittedtask {
     data['woker_id'] = workerId;
     data['submission_text'] = text;
     data['submitted_at'] = date;
+    data['due_date'] = dueDate;
     data['title'] = title;
     return data;
   }
