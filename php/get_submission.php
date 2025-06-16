@@ -12,7 +12,7 @@ include_once("db_connect.php");
 
 $workerId = $_POST['worker_id'];
 
-$sql = "SELECT s.*, w.title 
+$sql = "SELECT s.*, w.due_date, w.title 
         FROM tbl_submissions s
         JOIN tbl_works w ON s.work_id = w.id
         WHERE s.worker_id = '$workerId'
