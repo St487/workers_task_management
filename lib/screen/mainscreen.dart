@@ -20,6 +20,7 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    // Initialize the list of tab children with the respective screens
     tabchildren = [
       TaskListScreen(
         user: widget.user,
@@ -35,12 +36,12 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: tabchildren[_currentIndex],
+      body: tabchildren[_currentIndex], // Display the current tab's content based on the index
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.lightBlue.shade200,
         selectedItemColor: Colors.white,
         onTap: onTabTapped,
-        currentIndex: _currentIndex,
+        currentIndex: _currentIndex, // Set the current index to the selected tab
         items: [
           BottomNavigationBarItem(
               icon: Icon(
@@ -66,6 +67,7 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void onTabTapped(int value) {
+    // This function is called when a tab is tapped
     setState(() {
       _currentIndex = value;
       if (_currentIndex == 0) {

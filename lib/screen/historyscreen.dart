@@ -24,7 +24,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
   List<Submittedtask> submissionList = <Submittedtask>[];
   bool isLoading = false;
-  int? tappedIndex;
+  int? tappedIndex; // To track which item is tapped
+  // This will be used to show the details of the task when tapped
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +37,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
         backgroundColor: Colors.lightBlue.shade200,
       ),
       body: isLoading 
+      // If the data is still loading, show a loading indicator
       ? const Center(child: CircularProgressIndicator())
+      // If there are no tasks, show a message indicating that
       : submissionList.isEmpty
         ? const Center(
             child: Text(
@@ -52,11 +55,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
               children: [
                 Expanded(
                   child: ListView.builder(
-                  itemCount: submissionList.length, // number of tasks
+                  itemCount: submissionList.length,
                   itemBuilder: (context, index) {
-                    final task = submissionList[index]; // get the task at the current index
+                    final task = submissionList[index];
                     final isTapped = tappedIndex == index;
-
+                    // Check if the current item is tapped to change its appearance  
                     return GestureDetector(
                       onTap: () {
                         setState(() {
@@ -65,7 +68,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         Future.delayed(const Duration(milliseconds: 100), () {
                           if (mounted) {
                             setState(() {
-                              tappedIndex = null;
+                              tappedIndex = null; // Reset tapped index after a short delay
                             });
                           }
                         });
@@ -75,7 +78,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         margin: const EdgeInsets.only(bottom: 10),
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: isTapped ? Colors.grey.shade200 : Colors.white,
+                          color: isTapped ? Colors.grey.shade200 : Colors.white, // Change background color if tapped
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Row(
@@ -98,31 +101,31 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                     ],
                                   ),
                               
-                                const SizedBox(height: 4),
-                                Text(
-                                  task.text ?? '',
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(color: Colors.grey),
-                                ),
-                                const SizedBox(height: 4),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      "Submission Date: ${task.date != null ? DateFormat('yyyy-MM-dd').format(DateTime.parse(task.date!)) : "N/A"}",
-                                      style: const TextStyle(fontSize: 12),
-                                    ),
-                                  ]
-                                ),
-                              ],
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    task.text ?? '',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(color: Colors.grey),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        "Submission Date: ${task.date != null ? DateFormat('yyyy-MM-dd').format(DateTime.parse(task.date!)) : "N/A"}",
+                                        style: const TextStyle(fontSize: 12),
+                                      ),
+                                    ]
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                                        ),
                     );
-                },
+                  },
                 ),
               ),
             ]
@@ -148,17 +151,20 @@ class _HistoryScreenState extends State<HistoryScreen> {
           submissionList.clear();
           var data = jsondata['data'];
 
+          // Check if data is empty 
           if (data.isEmpty) {
             setState(() {
-              submissionList = [];
+              submissionList = []; // Clear the list if no tasks are found
             });
             return;
+          // If data is not empty, parse the tasks
           } else {
             for (var item in data) {
               submissionList.add(Submittedtask.fromJson(item));
             }
             setState(() {});
           }
+        // If the response indicates no tasks, clear the list and show no tasks available message
         } else if (jsondata['status'] == 'success' && jsondata['data'] == 'no task') {
           setState(() {
             submissionList = [];
@@ -177,6 +183,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     });
   }
   
+  // Function to show details of the submitted task
   void showDetails(Submittedtask task) {
     // Parse due date
     DateTime? dueDate;
@@ -188,11 +195,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
       }
     }
 
+    // Check if the current date is before the due date
+    // If dueDate is null, we assume the task can be edited
     bool canEdit = dueDate == null || 
     DateTime.now().toLocal().isBefore(
       DateTime(dueDate.year, dueDate.month, dueDate.day).add(const Duration(days: 1))
     );
 
+    // Show the dialog with task details
     showDialog(context: context, builder: (context) {
       return Dialog(
         shape:
@@ -331,7 +341,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         // After returning from edit screen
                         if (result == 'updated') {
                           setState(() {
-                            loadTasks(); // Reload your data here
+                            loadTasks(); // Reload data
                           });
                         }
                       },

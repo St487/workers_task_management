@@ -7,6 +7,12 @@ import 'package:worker_task_management/myconfig.dart';
 import 'package:worker_task_management/screen/login.dart';
 import 'package:worker_task_management/model/user.dart';
 
+// This screen displays the user's profile information and allows them to edit it.
+// It have two main functionalities:
+// 1. View the profile information of the user.
+// 2. Edit the profile information of the user, including name, gender, email, phone number and address.
+// The user can also log out from this screen.
+
 class ProfileScreen extends StatefulWidget {
   final User user;
   const ProfileScreen({super.key, required this.user});
@@ -44,6 +50,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         centerTitle: true,
         backgroundColor: Colors.lightBlue.shade200,
       ),
+      // This drawer provides options for editing the profile and logging out.
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
@@ -66,7 +73,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               title: Text('Logout'),
               onTap: () {
                 if (isEditing) {
-                  showCustomSnackBar("Please save or cancel your edits first.");
+                  showCustomSnackBar("Please save or cancel your edits first.", "black");
                   Navigator.pop(context); 
                   return;
                 }
@@ -77,7 +84,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ],
         ),
       ),
-        
+      
+      //contain editing mode and view mode with different UI
       body: isLoading
         ? const Center(child: CircularProgressIndicator())
         : SingleChildScrollView(
@@ -218,7 +226,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: isEditing
                       ? DropdownButton(
                           itemHeight: 60,
-                          value: genderController.text.isEmpty ? "Not Specified" : genderController.text,
+                          //automatically set the value as Not Specified if user not selected
+                          value: genderController.text.isEmpty ? "Not Specified" : genderController.text, 
                           underline: const SizedBox(),
                           isExpanded: true,
                           icon: const Icon(Icons.keyboard_arrow_down),
@@ -236,6 +245,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       : Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
+                            // If genderController is empty, display "Not specified"
                             genderController.text.isEmpty ? "Not specified" : genderController.text,
                             style: TextStyle(fontSize: 16),
                           ),
@@ -438,7 +448,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         emailController.text.isEmpty ||
         phoneController.text.isEmpty ||
         addressController.text.isEmpty) {
-      showCustomSnackBar("Please fill all fields");
+      showCustomSnackBar("Please fill all fields", "black");
       return;
     }
 
@@ -447,17 +457,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
       .hasMatch(emailController.text);
 
     if (!isValidEmail) {
-      showCustomSnackBar("Please enter a valid email");
+      showCustomSnackBar("Please enter a valid email", "black");
       return;
     }
 
     if (phoneController.text.length < 10 || phoneController.text.length > 15 || !RegExp(r'^[0-9]+$').hasMatch(phoneController.text)) {
-      showCustomSnackBar("Please enter a valid phone number");
+      showCustomSnackBar("Please enter a valid phone number", "black");
       return;
     }
 
     if (addressController.text.length < 5) {
-      showCustomSnackBar("Address must be at least 5 characters");
+      showCustomSnackBar("Address must be at least 5 characters", "black");
       return;
     }
 
@@ -526,23 +536,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
           setState(() {
             isEditing = false; // Exit editing mode
           });
-          showCustomSnackBar("Updated!");
+          showCustomSnackBar("Updated!", "green");
         } else if (jsondata['status'] == 'failed' && jsondata['data'] == 'email exists') {
           Navigator.of(context).pop(); 
-          showCustomSnackBar("Email already exists!");
+          showCustomSnackBar("Email already exists!", "black");
         } else {
           Navigator.of(context).pop(); 
-          showCustomSnackBar("Failed to update profile!");
+          showCustomSnackBar("Failed to update profile!", "black");
         }
       }
     });
   }
 
-    void showCustomSnackBar(String message) {
+  void showCustomSnackBar(String message, String color) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
         behavior: SnackBarBehavior.floating,
+        backgroundColor: color == "black" ? Colors.black : Colors.green,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
@@ -566,6 +577,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (response.statusCode == 200) {
         var jsondata = json.decode(response.body);
         if (jsondata['status'] == 'success') {
+          // Parse the user data from the response
           nameController = TextEditingController(text: widget.user.userName);
           emailController = TextEditingController(text: widget.user.userEmail);
           genderController = TextEditingController(
@@ -574,7 +586,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           phoneController = TextEditingController(text: widget.user.userPhone);
           addressController = TextEditingController(text: widget.user.userAddress);
         } else {
-          showCustomSnackBar("Failed to get data!");
+          showCustomSnackBar("Failed to get data!", "black");
         }
       }
     });

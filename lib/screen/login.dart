@@ -132,15 +132,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               String password = passwordController.text;
                               if (isChecked) {
                                 if (email.isEmpty && password.isEmpty) {
-                                  ScaffoldMessenger.of(context)
-                                      .showSnackBar(SnackBar(
-                                    content: Text("Please fill all fields"),
-                                    behavior: SnackBarBehavior.floating,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    margin: const EdgeInsets.all(16),
-                                  ));
+                                  showCustomSnackBar("Please fill all fields", "black");
                                   isChecked = false;
                                   return;
                                 } else {
@@ -220,14 +212,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
 
     if (email.isEmpty && password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Please fill all fields"),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        margin: const EdgeInsets.all(16),
-      ));
+      showCustomSnackBar("Please fill in all fields", "black");
       return;
     }
 
@@ -243,25 +228,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
           Navigator.of(context).pop(); // Close loading dialog
 
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content:
-                Text("Welcome ${user.userName}"),
-            backgroundColor: Colors.green,
-          ));
+          showCustomSnackBar("Welcome ${user.userName}", "green");
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) =>  MainScreen(user: user,)),
           );
         } else {
           Navigator.of(context).pop(); // Close the loading dialog
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text("Failed!"),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            margin: const EdgeInsets.all(16),
-          ));
+          showCustomSnackBar("Failed!", "black");
         }
       }
     });
@@ -278,5 +252,19 @@ class _LoginScreenState extends State<LoginScreen> {
       await prefs.remove('userPassword');
       await prefs.setBool('isLoggedIn', false);
     }
+  }
+
+  void showCustomSnackBar(String message, String color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: color == "green" ? Colors.green : Colors.black,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        margin: const EdgeInsets.all(16),
+      ),
+    );
   }
 }
