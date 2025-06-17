@@ -21,13 +21,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     'Female',
     'Male',
   ];
-  TextEditingController confirmPasswordController = TextEditingController();
   late TextEditingController nameController;
   late TextEditingController emailController;
   late TextEditingController genderController;
   late TextEditingController phoneController;
   late TextEditingController addressController;
-  TextEditingController passwordController = TextEditingController();
   
   @override
   void initState() {
@@ -61,19 +59,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 setState(() {
                   isEditing = true;
                 });
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.lock),
-              title: Text('Change Password'),
-              onTap: () {
-                if (isEditing) {
-                  showCustomSnackBar("Please save or cancel your edits first.");
-                  Navigator.pop(context); 
-                  return;
-                }
-                Navigator.pop(context); // close drawer
-                changePassword();
               },
             ),
             ListTile(
@@ -457,11 +442,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return;
     }
 
-    // if (password != confirmPassword) {
-    //   showCustomSnackBar("Passwords do not match");
-    //   return;
-    // }
-
     bool isValidEmail = RegExp(
         r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
       .hasMatch(emailController.text);
@@ -470,11 +450,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       showCustomSnackBar("Please enter a valid email");
       return;
     }
-
-    // if (password.length < 6) {
-    //   showCustomSnackBar("Password must be at least 6 characters");
-    //   return;
-    // }
 
     if (phoneController.text.length < 10 || phoneController.text.length > 15 || !RegExp(r'^[0-9]+$').hasMatch(phoneController.text)) {
       showCustomSnackBar("Please enter a valid phone number");
@@ -536,7 +511,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       "email": emailController.text,
       "phone": phoneController.text,
       "address": addressController.text,
-      "password": passwordController.text,
     }).then((response) async {
       print(response.body);
       if (response.statusCode == 200) {
@@ -548,7 +522,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           widget.user.userEmail = emailController.text;
           widget.user.userPhone = phoneController.text;
           widget.user.userAddress = addressController.text;
-          widget.user.userPassword = passwordController.text;
           Navigator.of(context).pop(); // Close the loading dialog
           setState(() {
             isEditing = false; // Exit editing mode
@@ -589,6 +562,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() {
         isLoading = false;
       });
+      print(response.body);
       if (response.statusCode == 200) {
         var jsondata = json.decode(response.body);
         if (jsondata['status'] == 'success') {
@@ -604,74 +578,5 @@ class _ProfileScreenState extends State<ProfileScreen> {
         }
       }
     });
-  }
-  
-  void changePassword() {
-  showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Change Password"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: passwordController,
-                obscureText: true,
-                decoration: const InputDecoration(labelText: "New Password"),
-              ),
-              TextField(
-                controller: confirmPasswordController,
-                obscureText: true,
-                decoration: const InputDecoration(labelText: "Confirm New Password"),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              child: const Text("Cancel"),
-              onPressed: () {
-                Navigator.of(context).pop();
-                setState(() {
-                  passwordController.clear();
-                  confirmPasswordController.clear();
-                });
-              },
-            ),
-            TextButton(
-              child: const Text("Change"),
-              onPressed: () {
-                Navigator.of(context).pop();
-                if (passwordController.text.isEmpty || confirmPasswordController.text.isEmpty) {
-                  showCustomSnackBar("Please fill all fields");
-                  return;
-                }
-                if (passwordController.text != confirmPasswordController.text) {
-                  setState(() {
-                    passwordController.clear();
-                    confirmPasswordController.clear();
-                  });
-                  showCustomSnackBar("Passwords do not match");
-                  return;
-                }
-                if (passwordController.text.length < 6) {
-                  setState(() {
-                    passwordController.clear();
-                    confirmPasswordController.clear();
-                  });
-                  showCustomSnackBar("Password must be at least 6 characters");
-                  return;
-                }
-                saveProfile();
-                setState(() {
-                  passwordController.clear();
-                  confirmPasswordController.clear();
-                });
-              },
-            ),
-          ],
-        );
-      }
-    );
   }
 }

@@ -41,11 +41,10 @@ class _TaskListScreenState extends State<TaskListScreen> {
             // Greeting message with user's name
             Row(
               children: [
-                const CircleAvatar(
-                  radius: 24,
-                  backgroundColor: Colors.grey,
-                  child: Icon(Icons.person, color: Colors.white),
-                ),
+                  CircleAvatar(
+                    radius: 35,
+                    backgroundImage: AssetImage("assets/images/logo.png"),
+                  ),
                 const SizedBox(width: 12),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
