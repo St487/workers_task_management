@@ -21,11 +21,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     'Female',
     'Male',
   ];
+  TextEditingController confirmPasswordController = TextEditingController();
   late TextEditingController nameController;
   late TextEditingController emailController;
   late TextEditingController genderController;
   late TextEditingController phoneController;
   late TextEditingController addressController;
+  TextEditingController passwordController = TextEditingController();
+  
   @override
   void initState() {
     super.initState();
@@ -61,9 +64,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
               },
             ),
             ListTile(
+              leading: Icon(Icons.lock),
+              title: Text('Change Password'),
+              onTap: () {
+                if (isEditing) {
+                  showCustomSnackBar("Please save or cancel your edits first.");
+                  Navigator.pop(context); 
+                  return;
+                }
+                Navigator.pop(context); // close drawer
+                changePassword();
+              },
+            ),
+            ListTile(
               leading: Icon(Icons.logout),
               title: Text('Logout'),
               onTap: () {
+                if (isEditing) {
+                  showCustomSnackBar("Please save or cancel your edits first.");
+                  Navigator.pop(context); 
+                  return;
+                }
                 Navigator.pop(context);
                 logout(context);
               },
@@ -162,7 +183,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         offset: Offset(0, 4),
                       ),
                     ],
-                    color: Colors.grey.shade300,
+                    color: isEditing ? Colors.white : Colors.grey.shade300,
                     border: Border.all(
                       color: Colors.grey.shade200,
                     ),
@@ -173,7 +194,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     padding: const EdgeInsets.all(8.0),
                     child: TextFormField(
                       controller: nameController,
-                      readOnly: true,
+                      readOnly: !isEditing,
                       decoration: const InputDecoration(
                         border: InputBorder.none,
                         contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
@@ -371,7 +392,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           backgroundColor: Colors.blue.shade300,
                           foregroundColor: Colors.white,
                         ),
-                        child: Text("Cancel Edit"),
+                        child: Text("Cancel"),
                       ),
                       ElevatedButton(
                         onPressed: () {
@@ -381,7 +402,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           backgroundColor: Colors.blue.shade300,
                           foregroundColor: Colors.white,
                         ),
-                        child: Text("Save Changes"),
+                        child: Text("Save"),
                       ),
                     ],
                   )
@@ -430,8 +451,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void updateProfile() {
     if (nameController.text.isEmpty ||
         emailController.text.isEmpty ||
-        //passwordController.text.isEmpty ||
-        //confirmPasswordController.text.isEmpty ||
         phoneController.text.isEmpty ||
         addressController.text.isEmpty) {
       showCustomSnackBar("Please fill all fields");
@@ -517,6 +536,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       "email": emailController.text,
       "phone": phoneController.text,
       "address": addressController.text,
+      "password": passwordController.text,
     }).then((response) async {
       print(response.body);
       if (response.statusCode == 200) {
@@ -528,6 +548,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           widget.user.userEmail = emailController.text;
           widget.user.userPhone = phoneController.text;
           widget.user.userAddress = addressController.text;
+          widget.user.userPassword = passwordController.text;
           Navigator.of(context).pop(); // Close the loading dialog
           setState(() {
             isEditing = false; // Exit editing mode
@@ -583,5 +604,74 @@ class _ProfileScreenState extends State<ProfileScreen> {
         }
       }
     });
+  }
+  
+  void changePassword() {
+  showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Change Password"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: passwordController,
+                obscureText: true,
+                decoration: const InputDecoration(labelText: "New Password"),
+              ),
+              TextField(
+                controller: confirmPasswordController,
+                obscureText: true,
+                decoration: const InputDecoration(labelText: "Confirm New Password"),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              child: const Text("Cancel"),
+              onPressed: () {
+                Navigator.of(context).pop();
+                setState(() {
+                  passwordController.clear();
+                  confirmPasswordController.clear();
+                });
+              },
+            ),
+            TextButton(
+              child: const Text("Change"),
+              onPressed: () {
+                Navigator.of(context).pop();
+                if (passwordController.text.isEmpty || confirmPasswordController.text.isEmpty) {
+                  showCustomSnackBar("Please fill all fields");
+                  return;
+                }
+                if (passwordController.text != confirmPasswordController.text) {
+                  setState(() {
+                    passwordController.clear();
+                    confirmPasswordController.clear();
+                  });
+                  showCustomSnackBar("Passwords do not match");
+                  return;
+                }
+                if (passwordController.text.length < 6) {
+                  setState(() {
+                    passwordController.clear();
+                    confirmPasswordController.clear();
+                  });
+                  showCustomSnackBar("Password must be at least 6 characters");
+                  return;
+                }
+                saveProfile();
+                setState(() {
+                  passwordController.clear();
+                  confirmPasswordController.clear();
+                });
+              },
+            ),
+          ],
+        );
+      }
+    );
   }
 }

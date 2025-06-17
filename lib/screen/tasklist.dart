@@ -275,7 +275,6 @@ class _TaskListScreenState extends State<TaskListScreen> {
             setState(() {});
           }
         } else {
-          Navigator.of(context).pop();
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text("Failed!"),
             behavior: SnackBarBehavior.floating,
