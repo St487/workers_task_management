@@ -19,7 +19,14 @@ $updateSql = "UPDATE tbl_works
               AND due_date < CURDATE()";
 $conn->query($updateSql);
 
-$sqlid="SELECT * FROM `tbl_works` WHERE `assigned_to` = '$userId'";
+$updateStatus = "UPDATE tbl_works 
+              SET status = 'pending' 
+              WHERE assigned_to = '$userId' 
+              AND status = 'overdue' 
+              AND due_date > CURDATE()";
+$conn->query($updateStatus);
+
+$sqlid="SELECT * FROM `tbl_works` WHERE `assigned_to` = '$userId' ORDER BY due_date ASC";
 $result = $conn->query($sqlid);
 
 if ($result->num_rows > 0) {
@@ -29,6 +36,9 @@ if ($result->num_rows > 0) {
     }
     $response = array( 'status' => 'success', 'data' => $sentArray);
       sendJsonResponse($response);
+}else if ($result->num_rows == 0) {
+    $response = array('status' => 'success', 'data' => 'no task');
+    sendJsonResponse($response);
 }else{
     $response = array( 'status' => 'failed', 'data' => null);
     sendJsonResponse($response);

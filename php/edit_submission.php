@@ -13,7 +13,7 @@ include_once("db_connect.php");
 $submissionId = $_POST['submissionId'];
 $details = $_POST['details'];
 
-$sqlupdate = "UPDATE `tbl_submissions` SET `submission_text` = '$details' WHERE `id` = '$submissionId'";
+$sqlupdate = "UPDATE `tbl_submissions` SET `submission_text` = '$details', `submitted_at` = NOW()  WHERE `id` = '$submissionId'";
 
 try{
     if ($conn->query($sqlupdate) === TRUE) {

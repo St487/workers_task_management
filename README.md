@@ -3,9 +3,10 @@
 ## 📱 Flutter App
 A mobile app for workers to :
 - Register and log in
-- View their profile
+- View and edit their profile
 - See a list of assigned tasks
 - Submit task completion reports
+- Edit their submission
 
 ## 🔙 Backend API (PHP)
 Located in the `php/` folder. Includes:
@@ -14,12 +15,16 @@ Located in the `php/` folder. Includes:
 - `get_works.php` – Retrieves tasks assigned to logged-in worker
 - `submit_work.php` – Submits a task completion report
 - `db_connect.php`
+- `edit_submission.php` - Allows editing a previously submitted task
+- `get_submission.php` - Fetches submitted task details
+- `get_profile.php` - Retrieves the logged-in user's profile data
+- `update_profile.php` - Updates user profile (e.g., name, email, phone, gender)
 
 ## 🗃️ Database Script
 Located in the `database/` folder:
 - `worker_task_management.sql` – Contains:
-  - `workers` table
-  - `tbl_works` table with 10 sample tasks
+  - `workers` table with 6 sample wokers
+  - `tbl_works` table with 35 sample tasks
   - `tbl_submissions` table for storing work submissions
 
 ## 🔗 Demo Video (YouTube)
@@ -27,6 +32,8 @@ Login, Register and Profile:
 [Click here to watch the demo video on YouTube](https://youtu.be/e_mDFLAwSVw)
 Task list and submission:
 [Click here to watch the demo video on YouTube](https://youtu.be/BufbBMHhTFA)
+Final Version:
+[Click here to watch the demo video on YouTube](https://youtu.be/lRxbcOJEZAE)
 
 ### Flutter
 1. Open the `worker_task_management/` folder in VS Code or Android Studio.

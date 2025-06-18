@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 17, 2025 at 08:14 PM
+-- Generation Time: Jun 18, 2025 at 10:23 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -40,6 +40,17 @@ CREATE TABLE `tbl_workers` (
 -- Dumping data for table `tbl_workers`
 --
 
+INSERT INTO `tbl_workers` (`id`, `full_name`, `gender`, `email`, `password`, `phone`, `address`) VALUES
+(1001, 'Ong Siew Nie', 'Not specified', 'siewnie@gmail.com', '6367c48dd193d56ea7b0baad25b19455e529f5ee', '01032978910', 'Jalan A Taman B'),
+(1002, 'Aman bin Abu', NULL, 'aman@gmail.com', '6367c48dd193d56ea7b0baad25b19455e529f5ee', '0198248781', 'Jalan B Taman C'),
+(1003, 'Low Yong Liang', NULL, 'liang@gmail.com', '6367c48dd193d56ea7b0baad25b19455e529f5ee', '0128374921', 'Jalan C Taman A'),
+(1004, 'Erica Anthony', NULL, 'erica@gmail.com', '6367c48dd193d56ea7b0baad25b19455e529f5ee', '0183859271', 'Jalan Z Taman B'),
+(1005, 'Ayuni binti Ahmad', NULL, 'ayuni@gmail.com', '6367c48dd193d56ea7b0baad25b19455e529f5ee', '0183498211', 'Jalan F Taman T'),
+(1006, 'Alia Irdina binti Ahmad', NULL, 'alia@gmail.com', '6367c48dd193d56ea7b0baad25b19455e529f5ee', '0189382918', 'Jalan X Taman Y');
+
+ALTER TABLE tbl_workers
+ADD COLUMN gender VARCHAR(15) DEFAULT NULL;
+
 --
 -- Indexes for dumped tables
 --
@@ -64,6 +75,3 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-
-ALTER TABLE `tbl_workers`
-ADD gender VARCHAR(10) AFTER full_name,;
