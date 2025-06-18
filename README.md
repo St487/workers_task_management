@@ -30,8 +30,10 @@ Located in the `database/` folder:
 ## 🔗 Demo Video (YouTube)
 Login, Register and Profile:
 [Click here to watch the demo video on YouTube](https://youtu.be/e_mDFLAwSVw)
+
 Task list and submission:
 [Click here to watch the demo video on YouTube](https://youtu.be/BufbBMHhTFA)
+
 Final Version:
 [Click here to watch the demo video on YouTube](https://youtu.be/lRxbcOJEZAE)
 
