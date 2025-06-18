@@ -321,7 +321,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             margin: const EdgeInsets.all(16),
           ));
             Navigator.of(context).pop();
-            Navigator.push(
+            Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => const LoginScreen()),
             );

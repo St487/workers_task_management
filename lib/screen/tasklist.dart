@@ -257,9 +257,10 @@ class _TaskListScreenState extends State<TaskListScreen> {
       setState(() {
         isLoading = false;
       });
+      print(response.body);
       if (response.statusCode == 200) {
         var jsondata = json.decode(response.body);
-        if (jsondata['status'] == 'success') {
+        if (jsondata['status'] == 'success' && jsondata['data'] != 'no task') {
           taskList.clear();
           var data = jsondata['data'];
 
@@ -273,6 +274,10 @@ class _TaskListScreenState extends State<TaskListScreen> {
             }
             setState(() {});
           }
+        } else if (jsondata['status'] == 'success' && jsondata['data'] == 'no task') {
+          setState(() {
+            taskList = [];
+          });
         } else {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text("Failed!"),
@@ -292,7 +297,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
     // Show only pending tasks
     return taskList.where((task) => task.status == 'pending').toList();
   } else {
-    // Show only completed tasks
+    // Show only overdue tasks
     return taskList.where((task) => task.status == 'overdue').toList();
   }
 }

@@ -167,6 +167,10 @@ class _LoginScreenState extends State<LoginScreen> {
                             context,
                             MaterialPageRoute(builder: (context) => const RegisterScreen()),
                           );
+                          setState(() {
+                            emailController.clear();
+                            passwordController.clear();
+                          });
                         },
                         child: Text(
                           " Register",
